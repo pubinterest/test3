@@ -1,0 +1,81 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>🔥 테스트 리뷰 시스템</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
+    input, select { padding: 8px; width: 100%; margin: 10px 0; }
+    button { padding: 10px 20px; background: #1da1f2; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    .review { border-bottom: 1px solid #ddd; padding: 10px 0; }
+    .stars { color: gold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>⭐ 정치인 별점 리뷰 (Firebase 연결 테스트)</h2>
+    <input type="text" id="name" placeholder="닉네임 입력" required>
+    <select id="politician">
+      <option value="김민수">김민수</option>
+      <option value="이철수">이철수</option>
+      <option value="홍길동">홍길동</option>
+    </select>
+    <select id="rating">
+      <option value="5">⭐️⭐️⭐️⭐️⭐️</option>
+      <option value="4">⭐️⭐️⭐️⭐️</option>
+      <option value="3">⭐️⭐️⭐️</option>
+      <option value="2">⭐️⭐️</option>
+      <option value="1">⭐️</option>
+    </select>
+    <input type="text" id="comment" placeholder="한 줄 리뷰" required>
+    <button onclick="submitReview()">등록</button>
+    <div id="reviewsList" style="margin-top: 30px;"></div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTBjC6XnzB4xUl9gZ6VPlx0vjqGzD-EOo",
+      authDomain: "politician-review.firebaseapp.com",
+      databaseURL: "https://politician-review-default-rtdb.firebaseio.com",
+      projectId: "politician-review",
+      storageBucket: "politician-review.firebasestorage.app",
+      messagingSenderId: "914715561802",
+      appId: "1:914715561802:web:92d081009c671225737bb3",
+      measurementId: "G-90PH3H8VV2"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function submitReview() {
+      const name = document.getElementById("name").value;
+      const politician = document.getElementById("politician").value;
+      const rating = parseInt(document.getElementById("rating").value);
+      const comment = document.getElementById("comment").value;
+
+      if (!name || !comment) return alert("모든 항목을 입력해주세요!");
+
+      db.ref("reviews").push({ nickname: name, politician, rating, comment });
+
+      document.getElementById("name").value = "";
+      document.getElementById("comment").value = "";
+    }
+
+    db.ref("reviews").on("child_added", snapshot => {
+      const data = snapshot.val();
+      const el = document.createElement("div");
+      el.className = "review";
+      el.innerHTML = `<strong>${data.politician}</strong> (${'⭐️'.repeat(data.rating)})<br>
+                      <em>${data.comment}</em><br><small>- ${data.nickname}</small>`;
+      const list = document.getElementById("reviewsList");
+      list.insertBefore(el, list.firstChild);
+    });
+  </script>
+</body>
+</html>
